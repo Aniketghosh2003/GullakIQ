@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 import PublicNavbar from './components/PublicNavbar';
 import LandingPage from './components/LandingPage';
 import FeaturesPage from './components/FeaturesPage';
 import HomeDashboard from './components/HomeDashboard';
 import InsightsDashboard from './components/InsightsDashboard';
 import GoalsDashboard from './components/GoalsDashboard';
+import TransactionsView from './components/TransactionsView';
 import ProfileSettings from './components/ProfileSettings';
+import SettingsView from './components/SettingsView';
 import AddTransactionModal from './components/AddTransactionModal';
 import AuthModal from './components/AuthModal';
 
 function MainApp() {
   const { user, isAuthenticated, loading, authFetch, setUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('home'); // Dashboard: 'home' | 'insights' | 'goals' | 'profile'
+  const [activeTab, setActiveTab] = useState('dashboard'); // Tabs: 'dashboard' | 'insights' | 'goals' | 'transactions' | 'profile' | 'settings'
   const [publicPage, setPublicPage] = useState('landing'); // Public: 'landing' | 'features'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
@@ -192,7 +194,7 @@ function MainApp() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#0b0b0e] text-white flex flex-col font-sans">
-        {/* Public Header without Dashboard Tabs */}
+        {/* Public Header */}
         <PublicNavbar
           publicPage={publicPage}
           setPublicPage={setPublicPage}
@@ -217,7 +219,7 @@ function MainApp() {
           initialMode={authModal.mode}
           onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
           onSuccess={() => {
-            setActiveTab('home');
+            setActiveTab('dashboard');
             fetchData();
           }}
         />
@@ -225,58 +227,75 @@ function MainApp() {
     );
   }
 
-  // Render Authenticated App Dashboard
+  // Render Authenticated App Layout with Left Sidebar matching exact design
   return (
-    <div className="min-h-screen bg-[#0e0e12] text-white flex flex-col font-sans selection:bg-paisa-lime selection:text-black">
-      {/* Top Private Navigation Bar with Dashboard Tabs */}
-      <Navbar
+    <div className="min-h-screen bg-[#09090c] text-white flex font-sans selection:bg-paisa-lime selection:text-black">
+      {/* Left Sidebar */}
+      <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAddModal={() => setIsAddModalOpen(true)}
-        onOpenLanding={() => {
-          // Switch to public landing view
-          setPublicPage('landing');
-        }}
-        onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-6xl w-full mx-auto">
-        {activeTab === 'home' && (
-          <HomeDashboard
-            summary={summary}
-            transactions={transactions}
-            onOpenAddModal={() => setIsAddModalOpen(true)}
-            onViewAllTransactions={() => setActiveTab('insights')}
-            onUpdateBudget={handleUpdateBudget}
-            onDeleteTransaction={handleDeleteTransaction}
-          />
-        )}
+      {/* Main Right Content Panel */}
+      <div className="flex-1 flex flex-col overflow-y-auto max-h-screen">
+        <main className="flex-1 p-6 sm:p-8 max-w-6xl w-full mx-auto">
+          {(activeTab === 'dashboard' || activeTab === 'home') && (
+            <HomeDashboard
+              user={user}
+              summary={summary}
+              transactions={transactions}
+              goals={goals}
+              onOpenAddModal={() => setIsAddModalOpen(true)}
+              onViewAllTransactions={() => setActiveTab('transactions')}
+              onUpdateBudget={handleUpdateBudget}
+              onDeleteTransaction={handleDeleteTransaction}
+              onNavigateGoals={() => setActiveTab('goals')}
+            />
+          )}
 
-        {activeTab === 'insights' && (
-          <InsightsDashboard
-            insightsData={insights}
-          />
-        )}
+          {activeTab === 'insights' && (
+            <InsightsDashboard
+              insightsData={insights}
+            />
+          )}
 
-        {activeTab === 'goals' && (
-          <GoalsDashboard
-            goals={goals}
-            onAddGoal={handleAddGoal}
-            onAllocateMoney={handleAllocateMoney}
-            onDeleteGoal={handleDeleteGoal}
-          />
-        )}
+          {activeTab === 'goals' && (
+            <GoalsDashboard
+              goals={goals}
+              onAddGoal={handleAddGoal}
+              onAllocateMoney={handleAllocateMoney}
+              onDeleteGoal={handleDeleteGoal}
+            />
+          )}
 
-        {activeTab === 'profile' && (
-          <ProfileSettings
-            user={user}
-            summary={summary}
-            onUpdateUser={handleUpdateUser}
-            onBackToHome={() => setActiveTab('home')}
-          />
-        )}
-      </main>
+          {activeTab === 'transactions' && (
+            <TransactionsView
+              transactions={transactions}
+              onDeleteTransaction={handleDeleteTransaction}
+              onOpenAddModal={() => setIsAddModalOpen(true)}
+            />
+          )}
+
+          {activeTab === 'profile' && (
+            <ProfileSettings
+              user={user}
+              summary={summary}
+              onUpdateUser={handleUpdateUser}
+              onBackToHome={() => setActiveTab('dashboard')}
+            />
+          )}
+
+          {activeTab === 'settings' && (
+            <SettingsView
+              user={user}
+              summary={summary}
+              onUpdateUser={handleUpdateUser}
+              onUpdateBudget={handleUpdateBudget}
+            />
+          )}
+        </main>
+      </div>
 
       {/* Quick Add Transaction Modal */}
       <AddTransactionModal
@@ -291,7 +310,7 @@ function MainApp() {
         initialMode={authModal.mode}
         onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
         onSuccess={() => {
-          setActiveTab('home');
+          setActiveTab('dashboard');
           fetchData();
         }}
       />

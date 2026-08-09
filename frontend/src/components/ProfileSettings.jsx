@@ -69,20 +69,23 @@ export default function ProfileSettings({ user, summary, onUpdateUser, onBackToH
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* Left Column: Account Quick Cards */}
         <div className="md:col-span-6 space-y-4">
-          {/* Linked Payment Methods */}
+          {/* Update Budget Card / Button */}
           <div className="bg-paisa-surface border border-paisa-border rounded-3xl p-5 shadow-xl flex items-center justify-between">
             <div className="flex items-center gap-3.5">
               <div className="w-10 h-10 rounded-2xl bg-paisa-card border border-paisa-border flex items-center justify-center text-white">
-                <Link2 className="w-5 h-5 text-paisa-lime" />
+                <RefreshCw className="w-5 h-5 text-paisa-lime" />
               </div>
               <div>
-                <h3 className="text-xs font-bold text-white">Linked Payment Methods</h3>
-                <p className="text-[10px] text-paisa-textMuted mt-0.5">GPay, PhonePe, Paytm connected</p>
+                <h3 className="text-xs font-bold text-white">Monthly Budget Target</h3>
+                <p className="text-[10px] text-paisa-textMuted mt-0.5">Current target: ₹{(user?.monthlyBudget || 35000).toLocaleString()}</p>
               </div>
             </div>
-            <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-semibold text-emerald-400">
-              Active
-            </span>
+            <button
+              onClick={onBackToHome}
+              className="px-3.5 py-2 rounded-xl bg-paisa-lime text-black font-bold text-xs hover:bg-paisa-limeHover transition-all shadow-[0_0_10px_rgba(204,255,0,0.3)]"
+            >
+              Update budget
+            </button>
           </div>
 
           {/* Budget Alerts */}
