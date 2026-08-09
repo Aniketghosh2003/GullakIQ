@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import PublicNavbar from './components/PublicNavbar';
 import LandingPage from './components/LandingPage';
+import FeaturesPage from './components/FeaturesPage';
 import HomeDashboard from './components/HomeDashboard';
 import InsightsDashboard from './components/InsightsDashboard';
 import GoalsDashboard from './components/GoalsDashboard';
@@ -12,7 +14,8 @@ import AuthModal from './components/AuthModal';
 function MainApp() {
   const { user, isAuthenticated, loading, authFetch, setUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('home'); // 'landing' | 'home' | 'insights' | 'goals' | 'profile'
+  const [activeTab, setActiveTab] = useState('home'); // Dashboard: 'home' | 'insights' | 'goals' | 'profile'
+  const [publicPage, setPublicPage] = useState('landing'); // Public: 'landing' | 'features'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
 
@@ -185,22 +188,29 @@ function MainApp() {
     }
   };
 
-  // Render Landing Page if tab is 'landing' or unauthenticated
-  if (activeTab === 'landing' || !isAuthenticated) {
+  // Render Public Website if user is NOT authenticated
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#0b0b0e] text-white flex flex-col font-sans">
-        <Navbar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          onOpenAddModal={() => setAuthModal({ isOpen: true, mode: 'signup' })}
-          onOpenLanding={() => setActiveTab('landing')}
+        {/* Public Header without Dashboard Tabs */}
+        <PublicNavbar
+          publicPage={publicPage}
+          setPublicPage={setPublicPage}
           onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
         />
 
-        <LandingPage
-          onLaunchDashboard={() => setAuthModal({ isOpen: true, mode: 'signup' })}
-          onOpenDemoModal={() => setAuthModal({ isOpen: true, mode: 'signup' })}
-        />
+        {/* Public Page View */}
+        {publicPage === 'landing' ? (
+          <LandingPage
+            onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+            onNavigateFeatures={() => setPublicPage('features')}
+          />
+        ) : (
+          <FeaturesPage
+            onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+            onNavigateHome={() => setPublicPage('landing')}
+          />
+        )}
 
         <AuthModal
           isOpen={authModal.isOpen}
@@ -215,14 +225,18 @@ function MainApp() {
     );
   }
 
+  // Render Authenticated App Dashboard
   return (
     <div className="min-h-screen bg-[#0e0e12] text-white flex flex-col font-sans selection:bg-paisa-lime selection:text-black">
-      {/* Top Main Navigation */}
+      {/* Top Private Navigation Bar with Dashboard Tabs */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAddModal={() => setIsAddModalOpen(true)}
-        onOpenLanding={() => setActiveTab('landing')}
+        onOpenLanding={() => {
+          // Switch to public landing view
+          setPublicPage('landing');
+        }}
         onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
       />
 
