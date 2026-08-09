@@ -1,0 +1,294 @@
+import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import LandingPage from './components/LandingPage';
+import HomeDashboard from './components/HomeDashboard';
+import InsightsDashboard from './components/InsightsDashboard';
+import GoalsDashboard from './components/GoalsDashboard';
+import ProfileSettings from './components/ProfileSettings';
+import AddTransactionModal from './components/AddTransactionModal';
+import AuthModal from './components/AuthModal';
+
+function MainApp() {
+  const { user, isAuthenticated, loading, authFetch, setUser } = useAuth();
+
+  const [activeTab, setActiveTab] = useState('home'); // 'landing' | 'home' | 'insights' | 'goals' | 'profile'
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
+
+  // Core dynamic user data
+  const [transactions, setTransactions] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [insights, setInsights] = useState(null);
+
+  // Fetch initial data from backend when user is authenticated
+  const fetchData = async () => {
+    if (!isAuthenticated) return;
+    try {
+      const [txRes, goalsRes, userRes, insightsRes] = await Promise.all([
+        authFetch('/api/transactions'),
+        authFetch('/api/goals'),
+        authFetch('/api/user'),
+        authFetch('/api/insights')
+      ]);
+
+      if (txRes.ok) setTransactions(await txRes.json());
+      if (goalsRes.ok) setGoals(await goalsRes.json());
+      if (userRes.ok) setUser(await userRes.json());
+      if (insightsRes.ok) setInsights(await insightsRes.json());
+    } catch (err) {
+      console.log('Error fetching user data:', err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [isAuthenticated]);
+
+  // Compute live budget summary
+  const totalSpent = transactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const budget = user?.monthlyBudget || 35000;
+  const remaining = Math.max(0, budget - totalSpent);
+  const budgetUsedPercent = budget > 0 ? Math.min(100, Math.round((totalSpent / budget) * 100)) : 0;
+
+  const summary = {
+    budget,
+    totalSpent,
+    remaining,
+    budgetUsedPercent,
+    daysLeft: Math.max(1, 31 - new Date().getDate()),
+    weeklySpend: insights?.weeklySpend
+  };
+
+  // Add Transaction handler
+  const handleAddTransaction = async (newTx) => {
+    if (!isAuthenticated) {
+      setAuthModal({ isOpen: true, mode: 'login' });
+      return;
+    }
+    try {
+      const res = await authFetch('/api/transactions', {
+        method: 'POST',
+        body: JSON.stringify(newTx)
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setTransactions(prev => [saved, ...prev]);
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error adding transaction:', err);
+    }
+  };
+
+  // Delete Transaction handler
+  const handleDeleteTransaction = async (id) => {
+    try {
+      const res = await authFetch(`/api/transactions/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setTransactions(prev => prev.filter(t => t._id !== id));
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error deleting transaction:', err);
+    }
+  };
+
+  // Add Goal handler
+  const handleAddGoal = async (newGoal) => {
+    if (!isAuthenticated) {
+      setAuthModal({ isOpen: true, mode: 'login' });
+      return;
+    }
+    try {
+      const res = await authFetch('/api/goals', {
+        method: 'POST',
+        body: JSON.stringify(newGoal)
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setGoals(prev => [...prev, saved]);
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error adding goal:', err);
+    }
+  };
+
+  // Allocate / Deposit money to goal
+  const handleAllocateMoney = async (goalId, amount) => {
+    try {
+      const res = await authFetch(`/api/goals/${goalId}/allocate`, {
+        method: 'POST',
+        body: JSON.stringify({ amount })
+      });
+      if (res.ok) {
+        const updatedGoal = await res.json();
+        setGoals(prev => prev.map(g => g._id === goalId ? updatedGoal : g));
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error allocating goal money:', err);
+    }
+  };
+
+  // Delete Goal handler
+  const handleDeleteGoal = async (goalId) => {
+    try {
+      const res = await authFetch(`/api/goals/${goalId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setGoals(prev => prev.filter(g => g._id !== goalId));
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error deleting goal:', err);
+    }
+  };
+
+  // Target Budget Update handler
+  const handleUpdateBudget = async (newMonthlyBudget) => {
+    try {
+      const res = await authFetch('/api/user/budget', {
+        method: 'PUT',
+        body: JSON.stringify({ monthlyBudget: newMonthlyBudget })
+      });
+      if (res.ok) {
+        const updatedUser = await res.json();
+        setUser(updatedUser);
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error updating budget:', err);
+    }
+  };
+
+  // Update User profile/settings
+  const handleUpdateUser = async (updatedData) => {
+    try {
+      const res = await authFetch('/api/user', {
+        method: 'PUT',
+        body: JSON.stringify(updatedData)
+      });
+      if (res.ok) {
+        const updatedUser = await res.json();
+        setUser(updatedUser);
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+    }
+  };
+
+  // Render Landing Page if tab is 'landing' or unauthenticated
+  if (activeTab === 'landing' || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#0b0b0e] text-white flex flex-col font-sans">
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onOpenAddModal={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+          onOpenLanding={() => setActiveTab('landing')}
+          onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+        />
+
+        <LandingPage
+          onLaunchDashboard={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+          onOpenDemoModal={() => setAuthModal({ isOpen: true, mode: 'signup' })}
+        />
+
+        <AuthModal
+          isOpen={authModal.isOpen}
+          initialMode={authModal.mode}
+          onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
+          onSuccess={() => {
+            setActiveTab('home');
+            fetchData();
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0e0e12] text-white flex flex-col font-sans selection:bg-paisa-lime selection:text-black">
+      {/* Top Main Navigation */}
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onOpenAddModal={() => setIsAddModalOpen(true)}
+        onOpenLanding={() => setActiveTab('landing')}
+        onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+      />
+
+      {/* Main Content Area */}
+      <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-6xl w-full mx-auto">
+        {activeTab === 'home' && (
+          <HomeDashboard
+            summary={summary}
+            transactions={transactions}
+            onOpenAddModal={() => setIsAddModalOpen(true)}
+            onViewAllTransactions={() => setActiveTab('insights')}
+            onUpdateBudget={handleUpdateBudget}
+            onDeleteTransaction={handleDeleteTransaction}
+          />
+        )}
+
+        {activeTab === 'insights' && (
+          <InsightsDashboard
+            insightsData={insights}
+          />
+        )}
+
+        {activeTab === 'goals' && (
+          <GoalsDashboard
+            goals={goals}
+            onAddGoal={handleAddGoal}
+            onAllocateMoney={handleAllocateMoney}
+            onDeleteGoal={handleDeleteGoal}
+          />
+        )}
+
+        {activeTab === 'profile' && (
+          <ProfileSettings
+            user={user}
+            summary={summary}
+            onUpdateUser={handleUpdateUser}
+            onBackToHome={() => setActiveTab('home')}
+          />
+        )}
+      </main>
+
+      {/* Quick Add Transaction Modal */}
+      <AddTransactionModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAddTransaction={handleAddTransaction}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModal.isOpen}
+        initialMode={authModal.mode}
+        onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
+        onSuccess={() => {
+          setActiveTab('home');
+          fetchData();
+        }}
+      />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}
