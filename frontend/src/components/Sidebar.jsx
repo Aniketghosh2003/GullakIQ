@@ -50,11 +50,10 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenAddModal }) {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    isActive
+                  className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${isActive
                       ? 'bg-[#181820] text-white border border-[#2a2a36] shadow-sm'
                       : 'text-paisa-textMuted hover:text-white hover:bg-[#14141a]'
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-paisa-lime' : 'text-paisa-textMuted'}`} />
                   <span>{item.label}</span>
@@ -75,11 +74,10 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenAddModal }) {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    isActive
+                  className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${isActive
                       ? 'bg-[#181820] text-white border border-[#2a2a36] shadow-sm'
                       : 'text-paisa-textMuted hover:text-white hover:bg-[#14141a]'
-                  }`}
+                    }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-paisa-lime' : 'text-paisa-textMuted'}`} />
                   <span>{item.label}</span>
@@ -100,7 +98,6 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenAddModal }) {
             <div className="text-xs font-bold text-white truncate max-w-[110px]">
               {user?.name || 'Aarav Mehta'}
             </div>
-            <div className="text-[10px] text-paisa-textMuted font-medium">Free plan</div>
           </div>
         </div>
 

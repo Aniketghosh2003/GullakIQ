@@ -358,6 +358,7 @@ function MainApp() {
             <SettingsView
               user={user}
               summary={summary}
+              transactions={transactions}
               onUpdateUser={handleUpdateUser}
               onUpdateBudget={handleUpdateBudget}
             />
