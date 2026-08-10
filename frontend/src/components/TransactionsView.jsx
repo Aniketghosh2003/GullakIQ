@@ -1,15 +1,56 @@
 import React, { useState } from 'react';
-import { Search, Download, Filter, Trash2, ArrowUpRight, ArrowDownRight, Utensils, Car, ShoppingBag, Wifi, Briefcase, Home as HomeIcon } from 'lucide-react';
+import { Search, Download, Filter, Trash2, Utensils, Car, ShoppingBag, Wifi, Briefcase, Home as HomeIcon } from 'lucide-react';
 
-export default function TransactionsView({ transactions, onDeleteTransaction, onOpenAddModal }) {
+export default function TransactionsView({ user, transactions, onDeleteTransaction, onOpenAddModal }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedMonth, setSelectedMonth] = useState('August 2026');
+
+  // Helper: Get dynamic month options from user creation date
+  const getAvailableMonths = () => {
+    const today = new Date();
+    const createdDate = user?.createdAt ? new Date(user.createdAt) : (
+      transactions && transactions.length > 0
+        ? new Date(Math.min(...transactions.map(t => new Date(t.date || Date.now()))))
+        : new Date()
+    );
+
+    const startYear = createdDate.getFullYear();
+    const startMonth = createdDate.getMonth();
+
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    const months = [];
+    let dateIter = new Date(currentYear, currentMonth, 1);
+    const minDate = new Date(startYear, startMonth, 1);
+
+    while (dateIter >= minDate) {
+      const monthLabel = dateIter.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const monthValue = `${dateIter.getFullYear()}-${String(dateIter.getMonth() + 1).padStart(2, '0')}`;
+      months.push({ label: monthLabel, value: monthValue });
+      dateIter.setMonth(dateIter.getMonth() - 1);
+    }
+
+    return months.length > 0 ? months : [{
+      label: today.toLocaleString('default', { month: 'long', year: 'numeric' }),
+      value: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
+    }];
+  };
+
+  const monthOptions = getAvailableMonths();
+  const [selectedMonth, setSelectedMonth] = useState(monthOptions[0].value);
+
+  // Parse selected month
+  const selectedYearNum = parseInt(selectedMonth.split('-')[0], 10);
+  const selectedMonthNum = parseInt(selectedMonth.split('-')[1], 10) - 1;
 
   const categories = ['All', 'Food', 'Travel', 'Shopping', 'Bills', 'Income'];
 
-  // Filter transactions dynamically
-  const filtered = transactions.filter((tx) => {
+  // Filter transactions dynamically by Month, Category, and Search query
+  const filtered = (transactions || []).filter((tx) => {
+    const d = new Date(tx.date || Date.now());
+    const matchesMonth = d.getFullYear() === selectedYearNum && d.getMonth() === selectedMonthNum;
+
     const matchesSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (tx.category && tx.category.toLowerCase().includes(searchQuery.toLowerCase()));
     
@@ -22,7 +63,7 @@ export default function TransactionsView({ transactions, onDeleteTransaction, on
       }
     }
 
-    return matchesSearch && matchesCat;
+    return matchesMonth && matchesSearch && matchesCat;
   });
 
   const getCategoryIcon = (category) => {
@@ -36,8 +77,8 @@ export default function TransactionsView({ transactions, onDeleteTransaction, on
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Top Header matching design */}
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-[11px] font-semibold text-paisa-textMuted uppercase tracking-wider">Full history</span>
@@ -45,7 +86,7 @@ export default function TransactionsView({ transactions, onDeleteTransaction, on
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Search bar matching design */}
+          {/* Search bar */}
           <div className="relative">
             <Search className="w-4 h-4 text-paisa-textMuted absolute left-3.5 top-3" />
             <input
@@ -67,7 +108,7 @@ export default function TransactionsView({ transactions, onDeleteTransaction, on
 
       {/* Filter Row */}
       <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1">
-        {/* Category Pills matching design */}
+        {/* Category Pills */}
         <div className="flex items-center gap-2">
           {categories.map((cat) => {
             const isActive = selectedCategory === cat;
@@ -87,23 +128,25 @@ export default function TransactionsView({ transactions, onDeleteTransaction, on
           })}
         </div>
 
-        {/* Month Selector matching design */}
+        {/* Dynamic Month Selector */}
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(e.target.value)}
-          className="bg-[#14141a] border border-[#242430] text-xs font-medium text-paisa-textMuted px-3 py-2 rounded-xl focus:outline-none focus:border-paisa-lime"
+          className="bg-[#14141a] border border-[#242430] text-xs font-medium text-white px-3.5 py-2 rounded-xl focus:outline-none focus:border-paisa-lime cursor-pointer"
         >
-          <option value="August 2026">August 2026</option>
-          <option value="July 2026">July 2026</option>
-          <option value="June 2026">June 2026</option>
+          {monthOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
         </select>
       </div>
 
-      {/* Main Transactions Table Container matching image */}
+      {/* Main Transactions Table Container */}
       <div className="bg-[#101015] border border-[#1e1e26] rounded-3xl p-6 shadow-2xl space-y-6">
         {filtered.length === 0 ? (
           <div className="text-center py-16 space-y-3">
-            <p className="text-sm text-paisa-textMuted">No transactions found matching your filter.</p>
+            <p className="text-sm text-paisa-textMuted">No transactions found for this month.</p>
             <button
               onClick={onOpenAddModal}
               className="text-xs text-paisa-lime hover:underline font-semibold"
@@ -136,7 +179,7 @@ export default function TransactionsView({ transactions, onDeleteTransaction, on
                     <div>
                       <div className="text-xs font-bold text-white">{tx.title}</div>
                       <div className="text-[10px] text-paisa-textMuted/80 mt-0.5 font-medium">
-                        {tx.date ? new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'}
+                        {tx.date ? new Date(tx.date).toLocaleDateString([], { month: 'short', day: 'numeric' }) : 'Recent'} • {tx.date ? new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                       </div>
                     </div>
                   </div>

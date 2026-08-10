@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, BarChart2, Target, CreditCard, User, Settings, Plus, LogOut } from 'lucide-react';
+import { LayoutDashboard, BarChart2, Target, CreditCard, User, Settings, Plus, LogOut, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ activeTab, setActiveTab, onOpenAddModal }) {
@@ -9,6 +9,7 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenAddModal }) {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'insights', label: 'Insights', icon: BarChart2 },
     { id: 'goals', label: 'Goals', icon: Target },
+    { id: 'investments', label: 'Investments', icon: TrendingUp },
     { id: 'transactions', label: 'Transactions', icon: CreditCard },
   ];
 

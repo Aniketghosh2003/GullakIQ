@@ -48,26 +48,13 @@ export default function AddTransactionModal({ isOpen, onClose, onAddTransaction 
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          {/* Type Toggle: Expense / Income */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-paisa-card rounded-xl border border-paisa-border">
-            <button
-              type="button"
-              onClick={() => setType('expense')}
-              className={`py-2 rounded-lg font-bold transition-all ${
-                type === 'expense' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'text-paisa-textMuted'
-              }`}
-            >
-              - Expense
-            </button>
-            <button
-              type="button"
-              onClick={() => setType('income')}
-              className={`py-2 rounded-lg font-bold transition-all ${
-                type === 'income' ? 'bg-paisa-lime/20 text-paisa-lime border border-paisa-lime/30' : 'text-paisa-textMuted'
-              }`}
-            >
-              + Income
-            </button>
+          {/* Header Tag */}
+          <div className="p-2.5 bg-[#14141c] rounded-2xl border border-paisa-border flex items-center justify-between text-xs">
+            <span className="font-bold text-red-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-400"></span>
+              - Expense Entry
+            </span>
+            <span className="text-[10px] text-paisa-textMuted font-medium">paisa tracking</span>
           </div>
 
           {/* Amount input */}

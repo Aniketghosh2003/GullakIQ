@@ -7,6 +7,7 @@ import FeaturesPage from './components/FeaturesPage';
 import HomeDashboard from './components/HomeDashboard';
 import InsightsDashboard from './components/InsightsDashboard';
 import GoalsDashboard from './components/GoalsDashboard';
+import InvestmentsView from './components/InvestmentsView';
 import TransactionsView from './components/TransactionsView';
 import ProfileSettings from './components/ProfileSettings';
 import SettingsView from './components/SettingsView';
@@ -16,7 +17,7 @@ import AuthModal from './components/AuthModal';
 function MainApp() {
   const { user, isAuthenticated, loading, authFetch, setUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('dashboard'); // Tabs: 'dashboard' | 'insights' | 'goals' | 'transactions' | 'profile' | 'settings'
+  const [activeTab, setActiveTab] = useState('dashboard'); // Tabs: 'dashboard' | 'insights' | 'goals' | 'investments' | 'transactions' | 'profile' | 'settings'
   const [publicPage, setPublicPage] = useState('landing'); // Public: 'landing' | 'features'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
@@ -68,7 +69,7 @@ function MainApp() {
     weeklySpend: insights?.weeklySpend
   };
 
-  // Add Transaction handler
+  // Add Transaction handler (Forces expense type)
   const handleAddTransaction = async (newTx) => {
     if (!isAuthenticated) {
       setAuthModal({ isOpen: true, mode: 'login' });
@@ -77,7 +78,7 @@ function MainApp() {
     try {
       const res = await authFetch('/api/transactions', {
         method: 'POST',
-        body: JSON.stringify(newTx)
+        body: JSON.stringify({ ...newTx, type: 'expense' })
       });
       if (res.ok) {
         const saved = await res.json();
@@ -257,6 +258,8 @@ function MainApp() {
           {activeTab === 'insights' && (
             <InsightsDashboard
               insightsData={insights}
+              user={user}
+              transactions={transactions}
             />
           )}
 
@@ -269,8 +272,13 @@ function MainApp() {
             />
           )}
 
+          {activeTab === 'investments' && (
+            <InvestmentsView />
+          )}
+
           {activeTab === 'transactions' && (
             <TransactionsView
+              user={user}
               transactions={transactions}
               onDeleteTransaction={handleDeleteTransaction}
               onOpenAddModal={() => setIsAddModalOpen(true)}

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { Search, Bell, Plus, Utensils, Car, ShoppingBag, Wifi, Briefcase, Home as HomeIcon, Edit3, Trash2, Target } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Bell, Plus, Utensils, Car, ShoppingBag, Wifi, Briefcase, Home as HomeIcon, Edit3, Trash2, Target } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 export default function HomeDashboard({ user, summary, transactions, goals, onOpenAddModal, onViewAllTransactions, onUpdateBudget, onDeleteTransaction, onNavigateGoals }) {
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [newBudgetInput, setNewBudgetInput] = useState(summary?.budget || 35000);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const budget = summary?.budget || 35000;
   const totalSpent = summary?.totalSpent || 0;
@@ -18,35 +17,77 @@ export default function HomeDashboard({ user, summary, transactions, goals, onOp
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
   const daysLeft = Math.max(1, daysInMonth - currentDay);
 
-  // Real today's spend
+  // Calculate Month Options starting from user creation date (or earliest transaction date, default fallback to current month)
+  const getAvailableMonths = () => {
+    const createdDate = user?.createdAt ? new Date(user.createdAt) : (
+      transactions && transactions.length > 0
+        ? new Date(Math.min(...transactions.map(t => new Date(t.date || Date.now()))))
+        : new Date()
+    );
+
+    const startYear = createdDate.getFullYear();
+    const startMonth = createdDate.getMonth(); // 0-indexed
+
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); // 0-indexed
+
+    const months = [];
+    let dateIter = new Date(currentYear, currentMonth, 1);
+    const minDate = new Date(startYear, startMonth, 1);
+
+    while (dateIter >= minDate) {
+      const monthLabel = dateIter.toLocaleString('default', { month: 'long', year: 'numeric' });
+      const monthValue = `${dateIter.getFullYear()}-${String(dateIter.getMonth() + 1).padStart(2, '0')}`;
+      months.push({ label: monthLabel, value: monthValue });
+
+      // Go back one month
+      dateIter.setMonth(dateIter.getMonth() - 1);
+    }
+
+    return months.length > 0 ? months : [{
+      label: today.toLocaleString('default', { month: 'long', year: 'numeric' }),
+      value: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
+    }];
+  };
+
+  const monthOptions = getAvailableMonths();
+  const [selectedMonth, setSelectedMonth] = useState(monthOptions[0].value);
+
+  // Filter transactions for the selected month
+  const selectedYearNum = parseInt(selectedMonth.split('-')[0], 10);
+  const selectedMonthNum = parseInt(selectedMonth.split('-')[1], 10) - 1; // 0-indexed
+
+  const monthTransactions = (transactions || []).filter(t => {
+    const d = new Date(t.date || Date.now());
+    return d.getFullYear() === selectedYearNum && d.getMonth() === selectedMonthNum;
+  });
+
+  // Calculate stats for selected month
   const todayDateStr = today.toDateString();
-  const spentToday = (transactions || [])
+  const spentToday = monthTransactions
     .filter(t => t.type === 'expense' && new Date(t.date || Date.now()).toDateString() === todayDateStr)
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Real total income
-  const totalIncome = (transactions || [])
+  const totalIncome = monthTransactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
 
-  // Real average spend per day
   const daysPassed = Math.max(1, currentDay);
   const avgPerDay = Math.round(totalSpent / daysPassed);
 
-  // Real status
   const budgetStatus = usedPercent > 100 ? 'Over budget' : usedPercent > 80 ? 'Near limit' : 'On track';
   const budgetStatusColor = usedPercent > 100 ? 'text-red-400' : usedPercent > 80 ? 'text-amber-400' : 'text-paisa-lime';
 
-  // Calculate real week spend (last 7 days)
+  // Calculate week spend (last 7 days)
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(today.getDate() - 7);
-  const thisWeekSpent = (transactions || [])
+  const thisWeekSpent = monthTransactions
     .filter(t => t.type === 'expense' && new Date(t.date || Date.now()) >= oneWeekAgo)
     .reduce((sum, t) => sum + t.amount, 0);
 
   // Real category breakdown for "Where it's going" pie chart
   const categoryMap = {};
-  (transactions || []).filter(t => t.type === 'expense').forEach(t => {
+  monthTransactions.filter(t => t.type === 'expense').forEach(t => {
     const cat = t.category || 'Others';
     categoryMap[cat] = (categoryMap[cat] || 0) + t.amount;
   });
@@ -61,14 +102,13 @@ export default function HomeDashboard({ user, summary, transactions, goals, onOp
   // Real daily breakdown for the week graph
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const weeklyDailyMap = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-  (transactions || []).filter(t => t.type === 'expense').forEach(t => {
+  monthTransactions.filter(t => t.type === 'expense').forEach(t => {
     const d = new Date(t.date || Date.now());
     weeklyDailyMap[d.getDay()] += t.amount;
   });
 
   const maxDayAmount = Math.max(...Object.values(weeklyDailyMap), 1);
   const currentDayIndex = today.getDay();
-  // Display ordered Mon -> Sun
   const orderedDays = [1, 2, 3, 4, 5, 6, 0];
   const weeklyData = orderedDays.map(dayIdx => {
     const amt = weeklyDailyMap[dayIdx];
@@ -79,12 +119,6 @@ export default function HomeDashboard({ user, summary, transactions, goals, onOp
       active: dayIdx === currentDayIndex
     };
   });
-
-  // Filter transactions based on top search bar
-  const displayedTransactions = (transactions || []).filter(tx => 
-    tx.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (tx.category && tx.category.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
 
   const handleBudgetSubmit = (e) => {
     e.preventDefault();
@@ -117,22 +151,18 @@ export default function HomeDashboard({ user, summary, transactions, goals, onOp
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Real Search bar */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-paisa-textMuted absolute left-3.5 top-3" />
-            <input
-              type="text"
-              placeholder="Search transactions"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-[#121217] border border-[#1e1e26] rounded-xl text-xs text-white placeholder-paisa-textMuted/60 focus:outline-none focus:border-paisa-lime w-48 sm:w-60"
-            />
-          </div>
-
-          {/* Month Indicator */}
-          <div className="bg-[#121217] border border-[#1e1e26] text-xs font-semibold text-white px-3.5 py-2 rounded-xl">
-            {today.toLocaleString('default', { month: 'long', year: 'numeric' })}
-          </div>
+          {/* Dynamic Month Selector (Starts from creation date, only shows past months if account > 1 month old) */}
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="bg-[#121217] border border-[#1e1e26] text-xs font-semibold text-white px-3.5 py-2 rounded-xl focus:outline-none focus:border-paisa-lime cursor-pointer"
+          >
+            {monthOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
 
           {/* Notification Bell */}
           <button className="w-9 h-9 rounded-xl bg-[#121217] border border-[#1e1e26] flex items-center justify-center text-paisa-textMuted hover:text-white transition-all">
@@ -413,7 +443,7 @@ export default function HomeDashboard({ user, summary, transactions, goals, onOp
             <button onClick={onViewAllTransactions} className="text-xs text-paisa-textMuted hover:text-white font-medium">View all</button>
           </div>
 
-          {displayedTransactions.length === 0 ? (
+          {monthTransactions.length === 0 ? (
             <div className="text-center py-6 text-paisa-textMuted text-xs space-y-2">
               <p>No transactions logged yet.</p>
               <button onClick={onOpenAddModal} className="text-paisa-lime hover:underline font-semibold">
@@ -422,7 +452,7 @@ export default function HomeDashboard({ user, summary, transactions, goals, onOp
             </div>
           ) : (
             <div className="space-y-3">
-              {displayedTransactions.slice(0, 4).map((tx) => (
+              {monthTransactions.slice(0, 4).map((tx) => (
                 <div key={tx._id} className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-[#181822] transition-all group">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-2xl bg-[#1a1a24] border border-[#262634] flex items-center justify-center shrink-0">
