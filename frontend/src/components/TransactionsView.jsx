@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { Search, Download, Filter, Trash2, Utensils, Car, ShoppingBag, Wifi, Briefcase, Home as HomeIcon } from 'lucide-react';
+import { Search, Download, Trash2, Utensils, Car, ShoppingBag, Wifi, Briefcase, Home as HomeIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function TransactionsView({ user, transactions, onDeleteTransaction, onOpenAddModal }) {
+  const { authFetch } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isExporting, setIsExporting] = useState(false);
 
   // Helper: Get dynamic month options from user creation date
   const getAvailableMonths = () => {
@@ -51,8 +54,13 @@ export default function TransactionsView({ user, transactions, onDeleteTransacti
     const d = new Date(tx.date || Date.now());
     const matchesMonth = d.getFullYear() === selectedYearNum && d.getMonth() === selectedMonthNum;
 
-    const matchesSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (tx.category && tx.category.toLowerCase().includes(searchQuery.toLowerCase()));
+    const query = searchQuery.trim().toLowerCase();
+    const matchesSearch = !query || 
+                          (tx.title && tx.title.toLowerCase().includes(query)) ||
+                          (tx.category && tx.category.toLowerCase().includes(query)) ||
+                          (tx.paymentMethod && tx.paymentMethod.toLowerCase().includes(query)) ||
+                          (tx.merchant && tx.merchant.toLowerCase().includes(query)) ||
+                          (tx.amount && String(tx.amount).includes(query));
     
     let matchesCat = true;
     if (selectedCategory !== 'All') {
@@ -65,6 +73,53 @@ export default function TransactionsView({ user, transactions, onDeleteTransacti
 
     return matchesMonth && matchesSearch && matchesCat;
   });
+
+  // Export CSV handler
+  const handleExportCSV = async () => {
+    setIsExporting(true);
+    try {
+      if (authFetch) {
+        const res = await authFetch('/api/insights/export');
+        if (res.ok) {
+          const blob = await res.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `paisa_transactions_${selectedMonth}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setIsExporting(false);
+          return;
+        }
+      }
+
+      // Fallback CSV generation from current filtered transactions
+      const headers = ['Title', 'Category', 'Payment Method', 'Amount', 'Type', 'Date'];
+      const rows = filtered.map(t => [
+        `"${t.title.replace(/"/g, '""')}"`,
+        `"${(t.category || '').replace(/"/g, '""')}"`,
+        `"${(t.paymentMethod || '').replace(/"/g, '""')}"`,
+        t.amount,
+        t.type,
+        `"${new Date(t.date || Date.now()).toLocaleDateString()}"`
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `paisa_transactions_${selectedMonth}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('Export error:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const getCategoryIcon = (category) => {
     const cat = category ? category.toLowerCase() : '';
@@ -86,7 +141,7 @@ export default function TransactionsView({ user, transactions, onDeleteTransacti
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Search bar */}
+          {/* Functional Search bar */}
           <div className="relative">
             <Search className="w-4 h-4 text-paisa-textMuted absolute left-3.5 top-3" />
             <input
@@ -98,10 +153,14 @@ export default function TransactionsView({ user, transactions, onDeleteTransacti
             />
           </div>
 
-          {/* Export Button */}
-          <button className="px-3.5 py-2 rounded-xl bg-[#14141a] border border-[#242430] text-xs font-semibold text-white hover:bg-[#1a1a22] transition-all flex items-center gap-1.5">
-            <Download className="w-3.5 h-3.5 text-paisa-textMuted" />
-            <span>Export</span>
+          {/* Functional Export Button */}
+          <button
+            onClick={handleExportCSV}
+            disabled={isExporting}
+            className="px-3.5 py-2 rounded-xl bg-[#14141a] border border-[#242430] text-xs font-semibold text-white hover:bg-[#1a1a22] transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-3.5 h-3.5 text-paisa-lime" />
+            <span>{isExporting ? 'Exporting...' : 'Export'}</span>
           </button>
         </div>
       </div>
@@ -146,7 +205,7 @@ export default function TransactionsView({ user, transactions, onDeleteTransacti
       <div className="bg-[#101015] border border-[#1e1e26] rounded-3xl p-6 shadow-2xl space-y-6">
         {filtered.length === 0 ? (
           <div className="text-center py-16 space-y-3">
-            <p className="text-sm text-paisa-textMuted">No transactions found for this month.</p>
+            <p className="text-sm text-paisa-textMuted">No transactions found for this query.</p>
             <button
               onClick={onOpenAddModal}
               className="text-xs text-paisa-lime hover:underline font-semibold"

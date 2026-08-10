@@ -314,6 +314,7 @@ function MainApp() {
               insightsData={insights}
               user={user}
               transactions={transactions}
+              investments={investments}
             />
           )}
 
