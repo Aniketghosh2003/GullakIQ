@@ -31,6 +31,7 @@ mongoose.connect(MONGODB_URI)
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/goals', require('./routes/goals'));
+app.use('/api/investments', require('./routes/investments'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/insights', require('./routes/insights'));
 

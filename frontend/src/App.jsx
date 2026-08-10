@@ -25,21 +25,24 @@ function MainApp() {
   // Core dynamic user data
   const [transactions, setTransactions] = useState([]);
   const [goals, setGoals] = useState([]);
+  const [investments, setInvestments] = useState([]);
   const [insights, setInsights] = useState(null);
 
   // Fetch initial data from backend when user is authenticated
   const fetchData = async () => {
     if (!isAuthenticated) return;
     try {
-      const [txRes, goalsRes, userRes, insightsRes] = await Promise.all([
+      const [txRes, goalsRes, invRes, userRes, insightsRes] = await Promise.all([
         authFetch('/api/transactions'),
         authFetch('/api/goals'),
+        authFetch('/api/investments'),
         authFetch('/api/user'),
         authFetch('/api/insights')
       ]);
 
       if (txRes.ok) setTransactions(await txRes.json());
       if (goalsRes.ok) setGoals(await goalsRes.json());
+      if (invRes.ok) setInvestments(await invRes.json());
       if (userRes.ok) setUser(await userRes.json());
       if (insightsRes.ok) setInsights(await insightsRes.json());
     } catch (err) {
@@ -158,6 +161,57 @@ function MainApp() {
     }
   };
 
+  // Investments Handlers
+  const handleAddInvestment = async (newInv) => {
+    if (!isAuthenticated) {
+      setAuthModal({ isOpen: true, mode: 'login' });
+      return;
+    }
+    try {
+      const res = await authFetch('/api/investments', {
+        method: 'POST',
+        body: JSON.stringify(newInv)
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setInvestments(prev => [saved, ...prev]);
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error adding investment:', err);
+    }
+  };
+
+  const handleAllocateInvestment = async (investmentId, amount, currentValue) => {
+    try {
+      const res = await authFetch(`/api/investments/${investmentId}/allocate`, {
+        method: 'POST',
+        body: JSON.stringify({ amount, currentValue })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setInvestments(prev => prev.map(i => i._id === investmentId ? updated : i));
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error allocating investment money:', err);
+    }
+  };
+
+  const handleDeleteInvestment = async (investmentId) => {
+    try {
+      const res = await authFetch(`/api/investments/${investmentId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setInvestments(prev => prev.filter(i => i._id !== investmentId));
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Error deleting investment:', err);
+    }
+  };
+
   // Target Budget Update handler
   const handleUpdateBudget = async (newMonthlyBudget) => {
     try {
@@ -273,7 +327,12 @@ function MainApp() {
           )}
 
           {activeTab === 'investments' && (
-            <InvestmentsView />
+            <InvestmentsView
+              investments={investments}
+              onAddInvestment={handleAddInvestment}
+              onAllocateInvestment={handleAllocateInvestment}
+              onDeleteInvestment={handleDeleteInvestment}
+            />
           )}
 
           {activeTab === 'transactions' && (

@@ -143,5 +143,77 @@ module.exports = {
       return memoryStore.goals.splice(idx, 1)[0];
     }
     return null;
+  },
+
+  // Investments methods
+  getInvestments: async (userId) => {
+    if (isDbConnected) {
+      const Investment = require('./models/Investment');
+      return await Investment.find({ userId }).sort({ createdAt: -1 });
+    }
+    if (!memoryStore.investments) memoryStore.investments = [];
+    return memoryStore.investments.filter(i => String(i.userId) === String(userId));
+  },
+
+  addInvestment: async (userId, data) => {
+    if (isDbConnected) {
+      const Investment = require('./models/Investment');
+      const inv = new Investment({ ...data, userId });
+      return await inv.save();
+    }
+    if (!memoryStore.investments) memoryStore.investments = [];
+    const newInv = {
+      _id: 'inv_' + Date.now(),
+      userId,
+      name: data.name,
+      category: data.category || 'Stocks',
+      investedAmount: Number(data.investedAmount || 0),
+      currentValue: Number(data.currentValue || data.investedAmount || 0),
+      createdAt: new Date().toISOString()
+    };
+    memoryStore.investments.unshift(newInv);
+    return newInv;
+  },
+
+  allocateInvestmentMoney: async (userId, investmentId, additionalAmount, newCurrentValue) => {
+    if (isDbConnected) {
+      const Investment = require('./models/Investment');
+      const inv = await Investment.findOne({ _id: investmentId, userId });
+      if (!inv) return null;
+      inv.investedAmount += Number(additionalAmount);
+      if (newCurrentValue !== undefined && newCurrentValue !== null) {
+        inv.currentValue = Number(newCurrentValue);
+      } else {
+        inv.currentValue += Number(additionalAmount);
+      }
+      return await inv.save();
+    }
+    if (!memoryStore.investments) memoryStore.investments = [];
+    const inv = memoryStore.investments.find(i => i._id === investmentId && String(i.userId) === String(userId));
+    if (inv) {
+      inv.investedAmount += Number(additionalAmount);
+      if (newCurrentValue !== undefined && newCurrentValue !== null) {
+        inv.currentValue = Number(newCurrentValue);
+      } else {
+        inv.currentValue += Number(additionalAmount);
+      }
+      return inv;
+    }
+    return null;
+  },
+
+  deleteInvestment: async (userId, investmentId) => {
+    if (isDbConnected) {
+      const Investment = require('./models/Investment');
+      return await Investment.findOneAndDelete({ _id: investmentId, userId });
+    }
+    if (!memoryStore.investments) memoryStore.investments = [];
+    const idx = memoryStore.investments.findIndex(
+      i => i._id === investmentId && String(i.userId) === String(userId)
+    );
+    if (idx !== -1) {
+      return memoryStore.investments.splice(idx, 1)[0];
+    }
+    return null;
   }
 };
