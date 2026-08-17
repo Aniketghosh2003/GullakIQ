@@ -22,6 +22,7 @@ function MainApp() {
   const [publicPage, setPublicPage] = useState('landing'); // Public: 'landing' | 'features'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [authModal, setAuthModal] = useState({ isOpen: false, mode: 'login' });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Core dynamic user data
   const [transactions, setTransactions] = useState([]);
@@ -302,11 +303,13 @@ function MainApp() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAddModal={() => setIsAddModalOpen(true)}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
       />
 
       {/* Main Right Content Panel */}
-      <div className="flex-1 flex flex-col overflow-y-auto max-h-screen">
-        <main className="flex-1 p-6 sm:p-8 max-w-6xl w-full mx-auto">
+      <div className="flex-1 flex flex-col overflow-y-auto max-h-screen pt-16 md:pt-0">
+        <main className="flex-1 p-4 sm:p-8 max-w-6xl w-full mx-auto">
           {(activeTab === 'dashboard' || activeTab === 'home') && (
             <HomeDashboard
               user={user}
