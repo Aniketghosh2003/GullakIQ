@@ -1,7 +1,7 @@
 {
-  "name": "paisa-backend",
+  "name": "gullakiq-backend",
   "version": "1.0.0",
-  "description": "Production Backend API for paisa - Expense Tracker for Indian Youth",
+  "description": "Production Backend API for GullakIQ - Smart Expense Tracker",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

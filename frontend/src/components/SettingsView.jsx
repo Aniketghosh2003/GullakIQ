@@ -181,7 +181,7 @@ export default function SettingsView({ user, summary, transactions, onUpdateUser
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'paisa_transactions_statement.csv');
+      link.setAttribute('download', 'GullakIQ_transactions_statement.csv');
       document.body.appendChild(link);
       link.click();
       link.remove();

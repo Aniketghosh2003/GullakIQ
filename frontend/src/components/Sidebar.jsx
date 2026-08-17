@@ -23,7 +23,7 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenAddModal }) {
       <div className="space-y-6">
         {/* Logo */}
         <div className="flex items-center gap-1 text-2xl font-bold tracking-tight px-2 pt-1">
-          <span className="text-white font-extrabold tracking-tight">paisa</span>
+          <span className="text-white font-extrabold tracking-tight">Gullak<span className="text-paisa-lime">IQ</span></span>
           <span className="w-2.5 h-2.5 rounded-full bg-paisa-lime inline-block shadow-[0_0_10px_#ccff00]"></span>
         </div>
 

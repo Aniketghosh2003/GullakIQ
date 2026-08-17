@@ -85,7 +85,7 @@ export default function TransactionsView({ user, transactions, onDeleteTransacti
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `paisa_transactions_${selectedMonth}.csv`;
+          a.download = `GullakIQ_transactions_${selectedMonth}.csv`;
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -110,7 +110,7 @@ export default function TransactionsView({ user, transactions, onDeleteTransacti
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `paisa_transactions_${selectedMonth}.csv`);
+      link.setAttribute('download', `GullakIQ_transactions_${selectedMonth}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
