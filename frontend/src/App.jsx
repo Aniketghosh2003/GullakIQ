@@ -13,6 +13,7 @@ import ProfileSettings from './components/ProfileSettings';
 import SettingsView from './components/SettingsView';
 import AddTransactionModal from './components/AddTransactionModal';
 import AuthModal from './components/AuthModal';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 function MainApp() {
   const { user, isAuthenticated, loading, authFetch, setUser } = useAuth();
@@ -247,6 +248,15 @@ function MainApp() {
 
   // Render Public Website if user is NOT authenticated
   if (!isAuthenticated) {
+    if (publicPage === 'privacy') {
+      return (
+        <PrivacyPolicy
+          onNavigateHome={() => setPublicPage('landing')}
+          onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+        />
+      );
+    }
+
     return (
       <div className="min-h-screen bg-[#0b0b0e] text-white flex flex-col font-sans">
         {/* Public Header */}
@@ -261,11 +271,13 @@ function MainApp() {
           <LandingPage
             onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
             onNavigateFeatures={() => setPublicPage('features')}
+            onNavigatePrivacy={() => setPublicPage('privacy')}
           />
         ) : (
           <FeaturesPage
             onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
             onNavigateHome={() => setPublicPage('landing')}
+            onNavigatePrivacy={() => setPublicPage('privacy')}
           />
         )}
 
@@ -361,6 +373,13 @@ function MainApp() {
               transactions={transactions}
               onUpdateUser={handleUpdateUser}
               onUpdateBudget={handleUpdateBudget}
+              onNavigatePrivacy={() => setActiveTab('privacy')}
+            />
+          )}
+
+          {activeTab === 'privacy' && (
+            <PrivacyPolicy
+              onNavigateHome={() => setActiveTab('dashboard')}
             />
           )}
         </main>

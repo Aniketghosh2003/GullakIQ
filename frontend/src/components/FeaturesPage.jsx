@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Check, Sparkles } from 'lucide-react';
 
-export default function FeaturesPage({ onOpenAuth, onNavigateHome }) {
+export default function FeaturesPage({ onOpenAuth, onNavigateHome, onNavigatePrivacy }) {
   // Keypad simulation state for ONE-HANDED ENTRY
   const [keypadAmount, setKeypadAmount] = useState('2,400');
   const [selectedCategory, setSelectedCategory] = useState('Food');
@@ -383,7 +383,7 @@ export default function FeaturesPage({ onOpenAuth, onNavigateHome }) {
           <div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">LEGAL</h4>
             <ul className="space-y-2 text-xs text-paisa-textMuted">
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><button onClick={onNavigatePrivacy} className="hover:text-white transition-colors">Privacy Policy</button></li>
               <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
             </ul>
           </div>

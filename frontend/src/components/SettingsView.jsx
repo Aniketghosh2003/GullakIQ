@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Bell, Download, ShieldCheck, RefreshCw, Key, Shield, Trash2, LogOut, Check, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-export default function SettingsView({ user, summary, transactions, onUpdateUser, onUpdateBudget }) {
+export default function SettingsView({ user, summary, transactions, onUpdateUser, onUpdateBudget, onNavigatePrivacy }) {
   const { logout, authFetch } = useAuth();
 
   // Profile Edit State
@@ -373,6 +373,21 @@ export default function SettingsView({ user, summary, transactions, onUpdateUser
                   Change
                 </button>
               </div>
+
+              {onNavigatePrivacy && (
+                <div className="flex items-center justify-between text-xs pt-3 border-t border-[#1c1c24]">
+                  <div>
+                    <div className="font-bold text-white">Privacy policy</div>
+                    <div className="text-[10px] text-paisa-textMuted">View data collection & encryption terms</div>
+                  </div>
+                  <button
+                    onClick={onNavigatePrivacy}
+                    className="px-3 py-1.5 rounded-xl bg-[#1c1c26] border border-[#2a2a38] text-xs text-paisa-lime hover:bg-[#242430]"
+                  >
+                    View policy
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

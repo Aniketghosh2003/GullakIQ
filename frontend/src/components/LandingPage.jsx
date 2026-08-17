@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, MessageSquare } from 'lucide-react';
 
-export default function LandingPage({ onOpenAuth, onNavigateFeatures }) {
+export default function LandingPage({ onOpenAuth, onNavigateFeatures, onNavigatePrivacy }) {
   const handleSeeFeatures = () => {
     onNavigateFeatures();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -278,7 +278,7 @@ export default function LandingPage({ onOpenAuth, onNavigateFeatures }) {
       {/* ------------------------------------------------------------- */}
       {/* REAL REVIEWS SECTION */}
       {/* ------------------------------------------------------------- */}
-      <section id="reviews" className="max-w-6xl w-full mx-auto px-6 py-16 space-y-12">
+      {/* <section id="reviews" className="max-w-6xl w-full mx-auto px-6 py-16 space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-extrabold text-paisa-lime uppercase tracking-widest">REAL USERS</span>
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
@@ -303,7 +303,7 @@ export default function LandingPage({ onOpenAuth, onNavigateFeatures }) {
             </button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ------------------------------------------------------------- */}
       {/* PRE-CTA BANNER CARD */}
@@ -362,16 +362,15 @@ export default function LandingPage({ onOpenAuth, onNavigateFeatures }) {
           <div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">COMPANY</h4>
             <ul className="space-y-2 text-xs text-paisa-textMuted">
-              <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
-              <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
+              <li><a href="https://aniketghosh-portfolio.vercel.app" className="hover:text-white transition-colors">About</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">LEGAL</h4>
             <ul className="space-y-2 text-xs text-paisa-textMuted">
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><button onClick={onNavigatePrivacy} className="hover:text-white transition-colors">Privacy Policy</button></li>
+
             </ul>
           </div>
         </div>

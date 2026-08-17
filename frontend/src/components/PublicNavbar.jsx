@@ -9,8 +9,8 @@ export default function PublicNavbar({ publicPage, setPublicPage, onOpenAuth }) 
   return (
     <nav className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between border-b border-white/5 relative z-50">
       {/* Logo */}
-      <div 
-        onClick={() => navigateTo('landing')} 
+      <div
+        onClick={() => navigateTo('landing')}
         className="flex items-center gap-1 text-2xl font-bold tracking-tight cursor-pointer hover:opacity-90 transition-opacity"
       >
         <span className="text-white font-extrabold tracking-tight">paisa</span>
@@ -19,24 +19,24 @@ export default function PublicNavbar({ publicPage, setPublicPage, onOpenAuth }) 
 
       {/* Public Navigation Links: Home, Features, About, Contact */}
       <div className="hidden md:flex items-center gap-8 text-xs font-medium text-paisa-textMuted">
-        <button 
-          onClick={() => navigateTo('landing')} 
+        <button
+          onClick={() => navigateTo('landing')}
           className={`transition-colors ${publicPage === 'landing' ? 'text-paisa-lime font-bold' : 'hover:text-white'}`}
         >
           Home
         </button>
-        <button 
-          onClick={() => navigateTo('features')} 
+        <button
+          onClick={() => navigateTo('features')}
           className={`transition-colors ${publicPage === 'features' ? 'text-paisa-lime font-bold' : 'hover:text-white'}`}
         >
           Features
         </button>
-        <a href="#about" className="hover:text-white transition-colors">
+        {/* <a href="#about" className="hover:text-white transition-colors">
           About
         </a>
         <a href="#contact" className="hover:text-white transition-colors">
           Contact
-        </a>
+        </a> */}
       </div>
 
       {/* Auth Action */}
