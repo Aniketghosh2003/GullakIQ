@@ -85,7 +85,7 @@ export default function PrivacyPolicy({ onNavigateHome, onOpenAuth }) {
       content: [
         {
           subtitle: "Session Caching",
-          text: "paisa utilizes browser LocalStorage and essential session tokens exclusively for user authentication and preserving UI preference states across sessions."
+          text: "GullakIQ utilizes browser LocalStorage and essential session tokens exclusively for user authentication and preserving UI preference states across sessions."
         },
         {
           subtitle: "No Tracking Cookies",
@@ -112,7 +112,7 @@ export default function PrivacyPolicy({ onNavigateHome, onOpenAuth }) {
             onClick={onNavigateHome}
             className="flex items-center gap-1 text-2xl font-bold tracking-tight cursor-pointer"
           >
-            <span className="text-white font-extrabold tracking-tight">paisa</span>
+            <span className="text-white font-extrabold tracking-tight">GullakIQ</span>
             <span className="w-2.5 h-2.5 rounded-full bg-paisa-lime inline-block shadow-[0_0_10px_#ccff00]"></span>
           </div>
 
@@ -141,7 +141,7 @@ export default function PrivacyPolicy({ onNavigateHome, onOpenAuth }) {
           </h1>
 
           <p className="text-sm text-paisa-textMuted max-w-xl mx-auto leading-relaxed">
-            Your trust is our top priority. Learn how <span className="text-white font-semibold">paisa</span> collects, encrypts, and protects your personal financial data.
+            Your trust is our top priority. Learn how <span className="text-white font-semibold">GullakIQ</span> collects, encrypts, and protects your personal financial data.
           </p>
 
           <div className="text-xs text-paisa-textMuted/70 pt-2">

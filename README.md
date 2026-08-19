@@ -1,4 +1,4 @@
-# GullakIQ (paisa)
+# GullakIQ
 
 A smart, modern expense management web application designed for young adults and teenagers to track spending, set savings goals, manage investments, and gain financial insights.
 

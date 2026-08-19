@@ -17,7 +17,7 @@ export default function ProfileSettings({ user, summary, onUpdateUser, onBackToH
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'paisa_my_transactions.csv';
+      a.download = 'gullakiq_my_transactions.csv';
       document.body.appendChild(a);
       a.click();
       a.remove();

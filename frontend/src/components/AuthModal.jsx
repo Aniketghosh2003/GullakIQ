@@ -45,7 +45,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onSu
         {/* Top Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xl font-bold tracking-tight">
-            <span>paisa</span>
+            <span>GullakIQ</span>
             <span className="w-2.5 h-2.5 rounded-full bg-paisa-lime inline-block shadow-[0_0_8px_#ccff00]"></span>
           </div>
           <button

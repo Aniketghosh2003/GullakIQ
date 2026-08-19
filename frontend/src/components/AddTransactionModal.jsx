@@ -54,7 +54,7 @@ export default function AddTransactionModal({ isOpen, onClose, onAddTransaction 
               <span className="w-2 h-2 rounded-full bg-red-400"></span>
               - Expense Entry
             </span>
-            <span className="text-[10px] text-paisa-textMuted font-medium">paisa tracking</span>
+            <span className="text-[10px] text-paisa-textMuted font-medium">GullakIQ tracking</span>
           </div>
 
           {/* Amount input */}

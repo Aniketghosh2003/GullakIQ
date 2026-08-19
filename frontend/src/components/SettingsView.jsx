@@ -106,7 +106,7 @@ export default function SettingsView({ user, summary, transactions, onUpdateUser
       if (permission === 'granted') {
         setPushNotifications(true);
         onUpdateUser({ pushNotifications: true });
-        new Notification('paisa Expense Tracker', {
+        new Notification('GullakIQ Expense Tracker', {
           body: '🔔 Web Push notifications enabled! You will receive budget & activity alerts.',
           icon: '/favicon.ico'
         });
@@ -156,7 +156,7 @@ export default function SettingsView({ user, summary, transactions, onUpdateUser
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'paisa_transactions_statement.csv';
+          a.download = 'gullakiq_transactions_statement.csv';
           document.body.appendChild(a);
           a.click();
           a.remove();

@@ -356,7 +356,7 @@ export default function FeaturesPage({ onOpenAuth, onNavigateHome, onNavigatePri
         <div className="max-w-6xl w-full mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center gap-1 text-2xl font-bold tracking-tight cursor-pointer" onClick={onNavigateHome}>
-              <span>paisa</span>
+              <span>GullakIQ</span>
               <span className="w-2.5 h-2.5 rounded-full bg-paisa-lime inline-block"></span>
             </div>
             <p className="text-xs text-paisa-textMuted leading-relaxed">
