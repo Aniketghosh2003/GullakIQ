@@ -66,11 +66,11 @@ export default function Preloader({ onComplete }) {
 
         {/* Brand Name */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-3xl font-extrabold tracking-tight text-white">paisa</span>
+          <span className="text-3xl font-extrabold tracking-tight text-white">GullakIQ</span>
           <span className="w-3 h-3 rounded-full bg-[#ccff00] inline-block shadow-[0_0_12px_#ccff00] animate-pulse" />
         </div>
         <p className="text-xs uppercase tracking-[0.25em] font-semibold text-gray-400 mb-8">
-          GullakIQ • Smart Expense Tracker
+          Smart Expense & Wealth Tracker
         </p>
 
         {/* Progress Bar Container */}
