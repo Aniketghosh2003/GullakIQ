@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Preloader from './components/Preloader';
 import Sidebar from './components/Sidebar';
 import PublicNavbar from './components/PublicNavbar';
 import LandingPage from './components/LandingPage';
@@ -17,6 +18,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 
 function MainApp() {
   const { user, isAuthenticated, loading, authFetch, setUser } = useAuth();
+  const [showPreloader, setShowPreloader] = useState(true);
 
   const [activeTab, setActiveTab] = useState('dashboard'); // Tabs: 'dashboard' | 'insights' | 'goals' | 'investments' | 'transactions' | 'profile' | 'settings'
   const [publicPage, setPublicPage] = useState('landing'); // Public: 'landing' | 'features'
@@ -247,165 +249,165 @@ function MainApp() {
     }
   };
 
-  // Render Public Website if user is NOT authenticated
-  if (!isAuthenticated) {
-    if (publicPage === 'privacy') {
-      return (
+  return (
+    <>
+      {showPreloader && <Preloader onComplete={() => setShowPreloader(false)} />}
+
+      {!isAuthenticated && publicPage === 'privacy' && (
         <PrivacyPolicy
           onNavigateHome={() => setPublicPage('landing')}
           onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
         />
-      );
-    }
+      )}
 
-    return (
-      <div className="min-h-screen bg-[#0b0b0e] text-white flex flex-col font-sans">
-        {/* Public Header */}
-        <PublicNavbar
-          publicPage={publicPage}
-          setPublicPage={setPublicPage}
-          onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
-        />
-
-        {/* Public Page View */}
-        {publicPage === 'landing' ? (
-          <LandingPage
+      {!isAuthenticated && publicPage !== 'privacy' && (
+        <div className="min-h-screen bg-[#0b0b0e] text-white flex flex-col font-sans">
+          {/* Public Header */}
+          <PublicNavbar
+            publicPage={publicPage}
+            setPublicPage={setPublicPage}
             onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
-            onNavigateFeatures={() => setPublicPage('features')}
-            onNavigatePrivacy={() => setPublicPage('privacy')}
           />
-        ) : (
-          <FeaturesPage
-            onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
-            onNavigateHome={() => setPublicPage('landing')}
-            onNavigatePrivacy={() => setPublicPage('privacy')}
+
+          {/* Public Page View */}
+          {publicPage === 'landing' ? (
+            <LandingPage
+              onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+              onNavigateFeatures={() => setPublicPage('features')}
+              onNavigatePrivacy={() => setPublicPage('privacy')}
+            />
+          ) : (
+            <FeaturesPage
+              onOpenAuth={(mode) => setAuthModal({ isOpen: true, mode })}
+              onNavigateHome={() => setPublicPage('landing')}
+              onNavigatePrivacy={() => setPublicPage('privacy')}
+            />
+          )}
+
+          <AuthModal
+            isOpen={authModal.isOpen}
+            initialMode={authModal.mode}
+            onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
+            onSuccess={() => {
+              setActiveTab('dashboard');
+              fetchData();
+            }}
           />
-        )}
+        </div>
+      )}
 
-        <AuthModal
-          isOpen={authModal.isOpen}
-          initialMode={authModal.mode}
-          onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
-          onSuccess={() => {
-            setActiveTab('dashboard');
-            fetchData();
-          }}
-        />
-      </div>
-    );
-  }
+      {isAuthenticated && (
+        <div className="min-h-screen bg-[#09090c] text-white flex font-sans selection:bg-paisa-lime selection:text-black">
+          {/* Left Sidebar */}
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onOpenAddModal={() => setIsAddModalOpen(true)}
+            mobileMenuOpen={mobileMenuOpen}
+            setMobileMenuOpen={setMobileMenuOpen}
+          />
 
-  // Render Authenticated App Layout with Left Sidebar matching exact design
-  return (
-    <div className="min-h-screen bg-[#09090c] text-white flex font-sans selection:bg-paisa-lime selection:text-black">
-      {/* Left Sidebar */}
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onOpenAddModal={() => setIsAddModalOpen(true)}
-        mobileMenuOpen={mobileMenuOpen}
-        setMobileMenuOpen={setMobileMenuOpen}
-      />
+          {/* Main Right Content Panel */}
+          <div className="flex-1 flex flex-col overflow-y-auto max-h-screen pt-16 md:pt-0">
+            <main className="flex-1 p-4 sm:p-8 max-w-6xl w-full mx-auto">
+              {(activeTab === 'dashboard' || activeTab === 'home') && (
+                <HomeDashboard
+                  user={user}
+                  summary={summary}
+                  transactions={transactions}
+                  goals={goals}
+                  onOpenAddModal={() => setIsAddModalOpen(true)}
+                  onViewAllTransactions={() => setActiveTab('transactions')}
+                  onUpdateBudget={handleUpdateBudget}
+                  onDeleteTransaction={handleDeleteTransaction}
+                  onNavigateGoals={() => setActiveTab('goals')}
+                />
+              )}
 
-      {/* Main Right Content Panel */}
-      <div className="flex-1 flex flex-col overflow-y-auto max-h-screen pt-16 md:pt-0">
-        <main className="flex-1 p-4 sm:p-8 max-w-6xl w-full mx-auto">
-          {(activeTab === 'dashboard' || activeTab === 'home') && (
-            <HomeDashboard
-              user={user}
-              summary={summary}
-              transactions={transactions}
-              goals={goals}
-              onOpenAddModal={() => setIsAddModalOpen(true)}
-              onViewAllTransactions={() => setActiveTab('transactions')}
-              onUpdateBudget={handleUpdateBudget}
-              onDeleteTransaction={handleDeleteTransaction}
-              onNavigateGoals={() => setActiveTab('goals')}
-            />
-          )}
+              {activeTab === 'insights' && (
+                <InsightsDashboard
+                  insightsData={insights}
+                  user={user}
+                  transactions={transactions}
+                  investments={investments}
+                />
+              )}
 
-          {activeTab === 'insights' && (
-            <InsightsDashboard
-              insightsData={insights}
-              user={user}
-              transactions={transactions}
-              investments={investments}
-            />
-          )}
+              {activeTab === 'goals' && (
+                <GoalsDashboard
+                  goals={goals}
+                  onAddGoal={handleAddGoal}
+                  onAllocateMoney={handleAllocateMoney}
+                  onDeleteGoal={handleDeleteGoal}
+                />
+              )}
 
-          {activeTab === 'goals' && (
-            <GoalsDashboard
-              goals={goals}
-              onAddGoal={handleAddGoal}
-              onAllocateMoney={handleAllocateMoney}
-              onDeleteGoal={handleDeleteGoal}
-            />
-          )}
+              {activeTab === 'investments' && (
+                <InvestmentsView
+                  investments={investments}
+                  onAddInvestment={handleAddInvestment}
+                  onAllocateInvestment={handleAllocateInvestment}
+                  onDeleteInvestment={handleDeleteInvestment}
+                />
+              )}
 
-          {activeTab === 'investments' && (
-            <InvestmentsView
-              investments={investments}
-              onAddInvestment={handleAddInvestment}
-              onAllocateInvestment={handleAllocateInvestment}
-              onDeleteInvestment={handleDeleteInvestment}
-            />
-          )}
+              {activeTab === 'transactions' && (
+                <TransactionsView
+                  user={user}
+                  transactions={transactions}
+                  onDeleteTransaction={handleDeleteTransaction}
+                  onOpenAddModal={() => setIsAddModalOpen(true)}
+                />
+              )}
 
-          {activeTab === 'transactions' && (
-            <TransactionsView
-              user={user}
-              transactions={transactions}
-              onDeleteTransaction={handleDeleteTransaction}
-              onOpenAddModal={() => setIsAddModalOpen(true)}
-            />
-          )}
+              {activeTab === 'profile' && (
+                <ProfileSettings
+                  user={user}
+                  summary={summary}
+                  onUpdateUser={handleUpdateUser}
+                  onBackToHome={() => setActiveTab('dashboard')}
+                />
+              )}
 
-          {activeTab === 'profile' && (
-            <ProfileSettings
-              user={user}
-              summary={summary}
-              onUpdateUser={handleUpdateUser}
-              onBackToHome={() => setActiveTab('dashboard')}
-            />
-          )}
+              {activeTab === 'settings' && (
+                <SettingsView
+                  user={user}
+                  summary={summary}
+                  transactions={transactions}
+                  onUpdateUser={handleUpdateUser}
+                  onUpdateBudget={handleUpdateBudget}
+                  onNavigatePrivacy={() => setActiveTab('privacy')}
+                />
+              )}
 
-          {activeTab === 'settings' && (
-            <SettingsView
-              user={user}
-              summary={summary}
-              transactions={transactions}
-              onUpdateUser={handleUpdateUser}
-              onUpdateBudget={handleUpdateBudget}
-              onNavigatePrivacy={() => setActiveTab('privacy')}
-            />
-          )}
+              {activeTab === 'privacy' && (
+                <PrivacyPolicy
+                  onNavigateHome={() => setActiveTab('dashboard')}
+                />
+              )}
+            </main>
+          </div>
 
-          {activeTab === 'privacy' && (
-            <PrivacyPolicy
-              onNavigateHome={() => setActiveTab('dashboard')}
-            />
-          )}
-        </main>
-      </div>
+          {/* Quick Add Transaction Modal */}
+          <AddTransactionModal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            onAddTransaction={handleAddTransaction}
+          />
 
-      {/* Quick Add Transaction Modal */}
-      <AddTransactionModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAddTransaction={handleAddTransaction}
-      />
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModal.isOpen}
-        initialMode={authModal.mode}
-        onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
-        onSuccess={() => {
-          setActiveTab('dashboard');
-          fetchData();
-        }}
-      />
-    </div>
+          {/* Auth Modal */}
+          <AuthModal
+            isOpen={authModal.isOpen}
+            initialMode={authModal.mode}
+            onClose={() => setAuthModal({ isOpen: false, mode: 'login' })}
+            onSuccess={() => {
+              setActiveTab('dashboard');
+              fetchData();
+            }}
+          />
+        </div>
+      )}
+    </>
   );
 }
 
