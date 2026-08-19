@@ -376,7 +376,7 @@ export default function LandingPage({ onOpenAuth, onNavigateFeatures, onNavigate
         </div>
 
         <div className="max-w-6xl w-full mx-auto px-6 border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-paisa-textMuted gap-4">
-          <div>© 2026 paisa. Made in India.</div>
+          <div>© 2026 GullakIQ. Made in India.</div>
         </div>
       </footer>
     </div>
