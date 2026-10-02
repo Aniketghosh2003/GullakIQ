@@ -32,7 +32,7 @@ export default function FeaturesPage({ onOpenAuth, onNavigateHome, onNavigatePri
       <section className="max-w-6xl w-full mx-auto px-6 pt-12 pb-16 text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-paisa-card/90 border border-white/10 text-xs font-medium text-paisa-textMuted">
           <span className="w-2 h-2 rounded-full bg-paisa-lime animate-pulse"></span>
-          <span>Everything paisa. does</span>
+          <span>Everything GullakIQ does</span>
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] max-w-4xl mx-auto">
@@ -56,7 +56,7 @@ export default function FeaturesPage({ onOpenAuth, onNavigateHome, onNavigatePri
 
       {/* Stacked Feature Spotlights */}
       <section className="max-w-6xl w-full mx-auto px-6 py-8 space-y-24">
-        
+
         {/* SPOTLIGHT 1: ONE-HANDED ENTRY */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center border-t border-white/10 pt-16">
           <div className="lg:col-span-6 space-y-5">
@@ -101,11 +101,10 @@ export default function FeaturesPage({ onOpenAuth, onNavigateHome, onNavigatePri
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                      selectedCategory === cat
-                        ? 'bg-paisa-lime text-black shadow-md'
-                        : 'bg-[#1a1a24] text-paisa-textMuted border border-white/5'
-                    }`}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${selectedCategory === cat
+                      ? 'bg-paisa-lime text-black shadow-md'
+                      : 'bg-[#1a1a24] text-paisa-textMuted border border-white/5'
+                      }`}
                   >
                     {cat === 'Food' ? '🍔 Food' : cat === 'Travel' ? '⚡ Travel' : '🛍️ Shopping'}
                   </button>
@@ -120,11 +119,10 @@ export default function FeaturesPage({ onOpenAuth, onNavigateHome, onNavigatePri
                       if (val === '✓') onOpenAuth('signup');
                       else handleKeypadPress(val);
                     }}
-                    className={`py-3 rounded-2xl text-base font-extrabold transition-all border ${
-                      val === '✓'
-                        ? 'bg-paisa-lime text-black border-paisa-lime shadow-[0_0_10px_rgba(204,255,0,0.3)]'
-                        : 'bg-[#181822] text-white border-white/5 hover:bg-[#222230]'
-                    }`}
+                    className={`py-3 rounded-2xl text-base font-extrabold transition-all border ${val === '✓'
+                      ? 'bg-paisa-lime text-black border-paisa-lime shadow-[0_0_10px_rgba(204,255,0,0.3)]'
+                      : 'bg-[#181822] text-white border-white/5 hover:bg-[#222230]'
+                      }`}
                   >
                     {val}
                   </button>
@@ -390,7 +388,7 @@ export default function FeaturesPage({ onOpenAuth, onNavigateHome, onNavigatePri
         </div>
 
         <div className="max-w-6xl w-full mx-auto px-6 border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-paisa-textMuted gap-4">
-          <div>© 2026 paisa. Made in India.</div>
+          <div>© 2026 GullakIQ. Made in India.</div>
         </div>
       </footer>
     </div>

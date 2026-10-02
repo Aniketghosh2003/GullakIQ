@@ -164,7 +164,7 @@ export default function LandingPage({ onOpenAuth, onNavigateFeatures, onNavigate
       <section id="why-paisa" className="bg-[#0e0e13] border-y border-white/5 py-20">
         <div className="max-w-6xl w-full mx-auto px-6 space-y-12">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
-            <span className="text-xs font-extrabold text-paisa-lime uppercase tracking-widest">WHY PAISA.</span>
+            <span className="text-xs font-extrabold text-paisa-lime uppercase tracking-widest">WHY GullakIQ.</span>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
               Money tracking that doesn't feel like homework.
             </h2>
@@ -228,7 +228,7 @@ export default function LandingPage({ onOpenAuth, onNavigateFeatures, onNavigate
       {/* ------------------------------------------------------------- */}
       <section className="max-w-6xl w-full mx-auto px-6 py-20 space-y-12">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
-          <span className="text-xs font-extrabold text-paisa-lime uppercase tracking-widest">INSIDE PAISA</span>
+          <span className="text-xs font-extrabold text-paisa-lime uppercase tracking-widest">INSIDE GullakIQ</span>
           <h2 className="text-3xl sm:text-5xl font-extrabold text-white">
             Clean by default. Yours in a tap.
           </h2>
